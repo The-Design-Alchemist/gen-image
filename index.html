@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Transformer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+ 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .upload-section, .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+
+        .profession-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .profession-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profession-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .profession-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .profession-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading p {
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(253, 116, 108, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .profession-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .demo-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Career Transformer ✨</h1>
+            <p>Transform yourself into any profession with AI magic</p>
+        </div>
+
+        <div class="demo-notice">
+            <strong>Demo Mode:</strong> This is a prototype. In production, this would integrate with AI image generation APIs like OpenAI's DALL-E, Midjourney, or Stable Diffusion.
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 style="margin-bottom: 20px; color: #333;">Upload Your Photo</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Click to upload or drag & drop</div>
+                    <div class="upload-subtext">JPG, PNG up to 10MB</div>
+                </div>
+                
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+                
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                </div>
+
+                <h3 style="margin-bottom: 20px; color: #333;">Choose Your Dream Career</h3>
+                
+                <div class="profession-grid">
+                    <button class="profession-card" data-profession="pilot">
+                        <span class="profession-icon">✈️</span>
+                        Pilot
+                    </button>
+                    <button class="profession-card" data-profession="astronaut">
+                        <span class="profession-icon">🚀</span>
+                        Astronaut
+                    </button>
+                    <button class="profession-card" data-profession="doctor">
+                        <span class="profession-icon">👩‍⚕️</span>
+                        Doctor
+                    </button>
+                    <button class="profession-card" data-profession="chef">
+                        <span class="profession-icon">👨‍🍳</span>
+                        Chef
+                    </button>
+                    <button class="profession-card" data-profession="artist">
+                        <span class="profession-icon">🎨</span>
+                        Artist
+                    </button>
+                    <button class="profession-card" data-profession="musician">
+                        <span class="profession-icon">🎵</span>
+                        Musician
+                    </button>
+                    <button class="profession-card" data-profession="firefighter">
+                        <span class="profession-icon">🚒</span>
+                        Firefighter
+                    </button>
+                    <button class="profession-card" data-profession="teacher">
+                        <span class="profession-icon">👩‍🏫</span>
+                        Teacher
+                    </button>
+                </div>
+
+                <button class="generate-btn" id="generateBtn" disabled>
+                    Transform My Photo ✨
+                </button>
+            </div>
+
+            <div class="result-section">
+                <h2 style="margin-bottom: 20px; color: #333;">Your Transformation</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Creating your professional transformation...</p>
+                </div>
+
+                <div id="resultContent" style="text-align: center; color: #666; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🎭</div>
+                    <p>Upload a photo and select a profession to see the magic happen!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let selectedProfession = null;
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            // Check if it's an image file
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const fileExtension = file.name.toLowerCase().split('.').pop();
+            const validExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            
+            if (!file.type.startsWith('image/') && !validExtensions.includes(fileExtension)) {
+                alert('Please select a valid image file (JPG, PNG, or WebP)');
+                return;
+            }
+
+            // Force the correct MIME type for common extensions
+            if (fileExtension === 'jpg' || fileExtension === 'jpeg') {
+                Object.defineProperty(file, 'type', {
+                    writable: false,
+                    value: 'image/jpeg'
+                });
+            } else if (fileExtension === 'png') {
+                Object.defineProperty(file, 'type', {
+                    writable: false,
+                    value: 'image/png'
+                });
+            }
+
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                updateGenerateButton();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Profession selection
+        const professionCards = document.querySelectorAll('.profession-card');
+        professionCards.forEach(card => {
+            card.addEventListener('click', () => {
+                professionCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedProfession = card.dataset.profession;
+                updateGenerateButton();
+            });
+        });
+
+        function updateGenerateButton() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = !selectedFile || !selectedProfession;
+        }
+
+        // Generate transformation
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            if (!selectedFile || !selectedProfession) return;
+
+            const loading = document.getElementById('loading');
+            const resultContent = document.getElementById('resultContent');
+            const generateBtn = document.getElementById('generateBtn');
+
+            try {
+                console.log('=== TRANSFORMATION STARTED ===');
+                console.log('Selected file:', selectedFile.name, selectedFile.size, 'bytes');
+                console.log('Selected profession:', selectedProfession);
+
+                // Show loading
+                loading.style.display = 'block';
+                resultContent.style.display = 'none';
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = 'Generating... ⏳';
+
+                console.log('Loading UI shown');
+
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                formData.append('profession', selectedProfession);
+
+                console.log('FormData created, sending request...');
+                console.log('Backend URL: http://127.0.0.1:3001/api/transform');
+
+                // Test if backend is reachable first
+                try {
+                    const healthCheck = await fetch('http://127.0.0.1:3001/api/health');
+                    console.log('Health check status:', healthCheck.status);
+                    if (!healthCheck.ok) {
+                        throw new Error('Backend is not responding');
+                    }
+                } catch (healthError) {
+                    console.error('Backend health check failed:', healthError);
+                    throw new Error('Cannot connect to backend server. Make sure it\'s running on port 3001.');
+                }
+
+                // Call backend API with longer timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    console.log('Request timed out after 60 seconds');
+                    controller.abort();
+                }, 60000); // 60 second timeout
+
+                console.log('Sending transform request...');
+                const response = await fetch('http://127.0.0.1:3001/api/transform', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                console.log('Response received! Status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response not OK:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const responseText = await response.text();
+                console.log('Raw response length:', responseText.length);
+                console.log('Raw response (first 200 chars):', responseText.substring(0, 200));
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('Parsed result keys:', Object.keys(result));
+                    console.log('Success status:', result.success);
+                    console.log('Image URL exists:', !!result.imageUrl);
+                    if (result.imageUrl) {
+                        console.log('Image URL:', result.imageUrl.substring(0, 50) + '...');
+                    }
+                } catch (parseError) {
+                    console.error('Failed to parse JSON:', parseError);
+                    console.error('Response text:', responseText);
+                    throw new Error('Invalid response from server: ' + responseText.substring(0, 100));
+                }
+
+                if (!response.ok) {
+                    throw new Error(result.error || `HTTP ${response.status}: ${responseText}`);
+                }
+
+                console.log('Success! Image URL:', result.imageUrl);
+
+                // Hide loading and show result
+                loading.style.display = 'none';
+                resultContent.style.display = 'block';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = 'Transform My Photo ✨';
+
+                console.log('About to show transformation result...');
+                // Show the actual result
+                showTransformationResult(result);
+                console.log('Transformation result displayed!');
+
+            } catch (error) {
+                console.error('=== ERROR OCCURRED ===');
+                console.error('Error type:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Full error:', error);
+                
+                // Hide loading
+                loading.style.display = 'none';
+                resultContent.style.display = 'block';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = 'Transform My Photo ✨';
+
+                // Show error message
+                if (error.name === 'AbortError') {
+                    showErrorMessage('Request timed out. Please try again.');
+                } else {
+                    showErrorMessage(error.message || 'Something went wrong. Please try again.');
+                }
+            }
+        });
+
+        function showTransformationResult(result) {
+            const resultContent = document.getElementById('resultContent');
+            
+            console.log('Showing result with image URL:', result.imageUrl);
+            
+            resultContent.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="margin-bottom: 20px;">
+                        <img src="${result.imageUrl}" 
+                             class="result-image" 
+                             alt="Transformed ${result.profession}" 
+                             style="max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);"
+                             onload="console.log('Image loaded successfully')"
+                             onerror="console.error('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display: none; padding: 20px; background: #f8f9fa; border-radius: 10px; color: #666;">
+                            <p>Image generated successfully but failed to display.</p>
+                            <p><a href="${result.imageUrl}" target="_blank" style="color: #667eea;">Click here to view image</a></p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+                               color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 10px;">✨ Transformation Complete!</h3>
+                        <p>You are now a professional ${result.profession}!</p>
+                        ${result.revisedPrompt ? `<p style="font-size: 0.9rem; opacity: 0.9; margin-top: 10px; font-style: italic;">${result.revisedPrompt}</p>` : ''}
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <button class="download-btn" onclick="downloadImage('${result.imageUrl}', '${result.profession}')">
+                            📥 Download
+                        </button>
+                        <button class="share-btn" onclick="shareTransformation('${result.profession}')">
+                            📤 Share
+                        </button>
+                        <button class="generate-btn" onclick="generateAnother()" 
+                                style="background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%); width: auto; padding: 12px 24px;">
+                            🎭 Try Another
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showErrorMessage(errorMessage) {
+            const resultContent = document.getElementById('resultContent');
+            
+            resultContent.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); 
+                               color: white; padding: 30px; border-radius: 15px; margin-bottom: 20px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">😔</div>
+                        <h3 style="margin-bottom: 15px;">Oops! Something went wrong</h3>
+                        <p style="margin-bottom: 15px;">${errorMessage}</p>
+                        <button class="generate-btn" onclick="tryAgain()" 
+                                style="background: rgba(255,255,255,0.2); width: auto; padding: 12px 24px;">
+                            🔄 Try Again
+                        </button>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: left;">
+                        <h4 style="color: #333; margin-bottom: 10px;">💡 Tips for better results:</h4>
+                        <ul style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                            <li>Use a clear, well-lit photo of your face</li>
+                            <li>Make sure your face is clearly visible</li>
+                            <li>Avoid sunglasses or face coverings</li>
+                            <li>Use JPG or PNG format under 10MB</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadImage(imageUrl, profession) {
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = `career-transformation-${profession}-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function shareTransformation(profession) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out my Career Transformation!',
+                    text: `I just transformed into a ${profession} using Career Transformer AI!`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const text = `Check out my transformation into a ${profession}! 🎭✨`;
+                navigator.clipboard.writeText(`${text} ${window.location.href}`).then(() => {
+                    alert('Link copied to clipboard! Share it with your friends!');
+                });
+            }
+        }
+
+        function generateAnother() {
+            // Reset selections
+            selectedFile = null;
+            selectedProfession = null;
+            
+            // Reset UI
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.querySelectorAll('.profession-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Reset result area
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div style="text-align: center; color: #666; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🎭</div>
+                    <p>Upload a photo and select a profession to see the magic happen!</p>
+                </div>
+            `;
+            
+            updateGenerateButton();
+        }
+
+        function tryAgain() {
+            generateAnother();
+        }
+    </script>
+</body>
+</html>
